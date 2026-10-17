@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Осенние запасы — Яша и Баловашка</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:'Comic Sans MS','Segoe UI',Arial,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
+  .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;background-size:cover;background-position:center;background-color:#EAF6EE}
+  .screen.on{display:flex}
+  .screen::before{content:'';position:absolute;inset:0;background:rgba(234,246,238,.88);z-index:0}
+  .screen>*{position:relative;z-index:1}
+
+  /* фоны по этапам */
+  #sStart{background:#EAF6EE}
+  #sEtap1{background-image:url('images/fon_polyana.jpg')}
+  #sEtap2{background-image:url('images/fon_les.jpg')}
+  #sEtap3{background:linear-gradient(#EAF6EE,#DFF0DF)}
+  #sPattern{background:linear-gradient(#EAF6EE,#DFF0DF)}
+  #sFinal{background:linear-gradient(#EAF6EE,#DFF0DF);gap:8px}
+
+  h1{font-size:clamp(26px,5.4vw,48px);color:#2E7D32;text-shadow:2px 2px 0 #FFF}
+  h2{font-size:clamp(20px,4.2vw,34px);color:#2E7D32;text-shadow:1px 1px 0 #FFF;margin-bottom:4px}
+  .logo{width:min(110px,22vw);border-radius:16px;margin-bottom:6px}
+  .sub{font-size:clamp(14px,3vw,20px);color:#33691E;margin-top:4px}
+  .heroTrio{width:min(210px,46vw);border-radius:24px;border:6px solid #FFF;box-shadow:0 8px 22px rgba(0,0,0,.2);object-fit:cover;aspect-ratio:1/1;margin:8px 0}
+  .widePic{width:min(400px,92vw);border-radius:20px;border:5px solid #FFF;box-shadow:0 6px 18px rgba(0,0,0,.18);object-fit:cover;margin:6px 0}
+  .hero{width:min(170px,38vw);border-radius:50%;border:5px solid #FFF;box-shadow:0 6px 18px rgba(0,0,0,.18);object-fit:cover;aspect-ratio:1/1}
+  .hero-sm{width:min(100px,22vw);border-radius:50%;border:4px solid #FFF;box-shadow:0 4px 12px rgba(0,0,0,.15);object-fit:cover;aspect-ratio:1/1}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#FFB74D;color:#5D3A1A;font-size:clamp(18px,3.6vw,28px);font-weight:bold;border:none;border-radius:60px;padding:13px 32px;margin-top:14px;box-shadow:0 5px 0 #E08A2E,0 8px 16px rgba(0,0,0,.15);cursor:pointer;font-family:inherit;transition:transform .12s}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #E08A2E}
+  .btn.green{background:#81C784;box-shadow:0 5px 0 #5AA65E}
+  .btn.firm{background:#FFF;color:#2E7D32;border:3px solid #2E7D32;box-shadow:0 5px 0 #A5D6A7}
+  .speech{background:#FFF;border-radius:22px;padding:10px 18px;font-size:clamp(16px,3.2vw,24px);color:#4E342E;max-width:94%;box-shadow:0 4px 14px rgba(0,0,0,.12);margin:8px 0;line-height:1.35}
+  /* зелёная надпись-заголовок (без белого поля) */
+  .stageTitle{font-size:clamp(22px,4.6vw,34px);color:#2E7D32;font-weight:bold;text-shadow:1px 1px 0 rgba(255,255,255,.8);margin:8px 0 4px}
+
+  /* счётчик-корзинка */
+  #basketRow{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0}
+  .basketImg{width:min(44px,10vw);border-radius:50%;border:2px solid #FFF;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+  #cnt{font-size:clamp(18px,3.8vw,26px);color:#2E5D2E;font-weight:bold;background:#FFF;border-radius:30px;padding:4px 16px;box-shadow:0 3px 8px rgba(0,0,0,.1)}
+
+  /* карточки-предметы */
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(520px,94vw);margin-top:6px}
+  .card{background:#FFF;border:3px solid #FFF;border-radius:50%;box-shadow:0 4px 10px rgba(0,0,0,.15);cursor:pointer;aspect-ratio:1/1;padding:6px;transition:transform .12s;overflow:hidden}
+  .card:active{transform:scale(.92)}
+  .card img{width:100%;height:100%;object-fit:contain;border-radius:50%}
+  .card.done{visibility:hidden}
+  .card.wrong{animation:shake .4s;border-color:#EF9A9A}
+  .card.pick{border-color:#66BB6A}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  @media (max-width:430px){.grid{grid-template-columns:repeat(4,1fr);gap:6px}}
+
+  /* задачки */
+  .zRow{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;max-width:94vw;margin:6px 0}
+  .zItem{display:flex;align-items:center;gap:2px;background:#FFF;border-radius:14px;padding:4px 8px;box-shadow:0 3px 8px rgba(0,0,0,.1)}
+  .zItem img{width:clamp(26px,6vw,42px);aspect-ratio:1/1;object-fit:contain}
+  .zSign{font-size:clamp(22px,5vw,34px);font-weight:bold;color:#5D4037}
+  .zGone{opacity:.35}
+  .expr{font-size:clamp(30px,7vw,52px);color:#1B5E20;font-weight:bold;margin:6px 0;background:#FFF;border-radius:18px;padding:4px 26px;box-shadow:0 3px 10px rgba(0,0,0,.1);display:none}
+  .numRow{display:flex;gap:14px;justify-content:center;margin-top:8px}
+  .numbtn{width:clamp(68px,17vw,100px);height:clamp(68px,17vw,100px);border-radius:50%;background:#FFF;border:4px solid #2E7D32;font-size:clamp(30px,7vw,48px);font-weight:bold;color:#2E7D32;cursor:pointer;box-shadow:0 5px 0 #A5D6A7;font-family:inherit;transition:transform .12s}
+  .numbtn:active{transform:translateY(4px);box-shadow:0 1px 0 #A5D6A7}
+  .numbtn.good{border-color:#66BB6A;background:#E8F5E9}
+  .numbtn.bad{border-color:#EF9A9A;background:#FFEBEE;animation:shake .4s}
+  .numbtn.locked{pointer-events:none;opacity:.6}
+
+  #sFinal h2{color:#279B3F;font-size:clamp(24px,5vw,42px)}
+  /* звёзды финала */
+  .stars{font-size:clamp(28px,6vw,50px);letter-spacing:6px;margin:4px 0}
+  .heroes{display:flex;gap:14px;align-items:center;justify-content:center}
+  .proverb{font-size:clamp(17px,3.6vw,26px);color:#4E342E;font-style:italic;background:rgba(255,255,255,.85);border-radius:16px;padding:8px 18px;margin-top:10px;box-shadow:0 3px 10px rgba(0,0,0,.1)}
+
+  /* этап «Дорожка по образцу» */
+  .patLabel{font-size:clamp(13px,2.6vw,17px);color:#795548;font-weight:bold;margin:6px 0 3px}
+  .patRow{display:flex;gap:6px;justify-content:center;align-items:center;background:rgba(255,255,255,.85);border-radius:16px;padding:8px 10px;min-height:64px;width:min(440px,92vw);flex-wrap:wrap}
+  .patRow img{width:clamp(38px,8.5vw,58px);aspect-ratio:1/1;object-fit:contain}
+  .slot{border:2px dashed #BCAAA4;border-radius:12px;width:clamp(38px,8.5vw,58px);aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:#FFF}
+  .slot img{width:100%;height:100%;object-fit:contain}
+  .palRow{display:flex;gap:10px;justify-content:center;margin-top:14px}
+  .pal{width:clamp(60px,14vw,86px);aspect-ratio:1/1;border-radius:50%;background:#FFF;border:4px solid #FFE0B2;box-shadow:0 4px 10px rgba(0,0,0,.14);cursor:pointer;padding:6px;transition:transform .12s}
+  .pal:active{transform:scale(.9)}
+  .pal img{width:100%;height:100%;object-fit:contain;border-radius:50%}
+  .pal.wrong{animation:shake .4s;border-color:#EF9A9A}
+  .confetti{position:fixed;top:-20px;width:12px;height:12px;border-radius:3px;z-index:60;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+
+<!-- СТАРТ -->
+<div class="screen on" id="sStart">
+  <img class="logo" src="images/logo.png" alt="">
+  <h1>Осенние запасы</h1>
+  <div class="sub">приключения Яши и Баловашки · 6–7 лет</div>
+  <img class="heroTrio" src="images/osen_troe.jpg" alt="Яша, Наташа и Баловашка осенью">
+  <button class="btn firm" id="playBtn">▶ Играть!</button>
+</div>
+
+<!-- ЭТАП 1: СОБЕРИ РОВНО N -->
+<div class="screen" id="sEtap1">
+  <img class="hero-sm" src="images/yasha.jpg" alt="Яша">
+  <div class="speech" id="spE1">Осень! Пора делать запасы на зиму!</div>
+  <div id="basketRow">
+    <img class="basketImg" src="images/yabloko.jpg" id="basketIcon" alt="">
+    <div id="cnt">0</div>
+  </div>
+  <div class="grid" id="grid1"></div>
+</div>
+
+<!-- ЭТАП 2: КЛЕНОВЫЕ ЛИСТОЧКИ -->
+<div class="screen" id="sEtap2">
+  <img class="hero-sm" src="images/balovashka.jpg" alt="Баловашка">
+  <div class="speech" id="spE2">Найди и поймай все кленовые листочки!</div>
+  <div id="basketRow">
+    <img class="basketImg" src="images/klen_kras.jpg" alt="">
+    <div id="cnt2">0</div>
+  </div>
+  <div class="grid" id="grid2"></div>
+</div>
+
+<!-- ЭТАП 3: ДОРОЖКА ПО ОБРАЗЦУ -->
+<div class="screen" id="sPattern">
+  <img class="hero-sm" src="images/yasha.jpg" alt="Яша">
+  <div class="speech" id="spPat">Выложи дорожку из листьев как на образце!</div>
+  <div class="patLabel">🍂 Образец</div>
+  <div class="patRow" id="patSample"></div>
+  <div class="patLabel">Твоя дорожка</div>
+  <div class="patRow" id="patFill"></div>
+  <div class="palRow" id="palRow"></div>
+</div>
+
+<!-- ЭТАП 4: ЗАДАЧКИ -->
+<div class="screen" id="sEtap3">
+  <img class="widePic" src="images/natasha_korzinka.jpg" alt="Наташа с корзинкой">
+  <div class="stageTitle" id="spE3">А теперь — задачки!</div>
+  <div class="zRow" id="zRow"></div>
+  <div class="expr" id="zExpr"></div>
+  <div class="numRow" id="numRow"></div>
+</div>
+
+<!-- ФИНАЛ -->
+<div class="screen" id="sFinal">
+  <h2 id="spFinal">Запасы готовы — зима не страшна!</h2>
+  <div class="stars">⭐⭐⭐</div>
+  <video id="vidStar" src="video/zvezdochka.mp4" poster="images/poster_zvezdochka.jpg" playsinline preload="metadata"
+         style="width:min(560px,80%);max-height:40vh;border-radius:14px;background:#000"></video>
+  <button class="btn firm" id="btnStar" style="margin-top:6px">▶ Посмотреть: звёздочка!</button>
+  <div class="momcard" style="background:rgba(255,255,255,.9);border-radius:16px;padding:10px 16px;max-width:560px;margin-top:8px;font-size:clamp(15px,3.4vw,20px);color:#2E5D2E">
+    <b>Маме 💛</b><br>На прогулке соберите листики и посчитайте их вместе. Похвалите малыша за старание!
+  </div>
+  <button class="btn firm" id="againBtn" style="display:none">🔁 Сыграть ещё раз</button>
+</div>
+
+<script>
+/* ============ ЗВУК ============ */
+var cache = {};
+function sfx(name, cb){
+  var a = cache[name] || (cache[name] = new Audio('sounds/' + name + '.mp3'));
+  a.onended = cb || null;
+  a.currentTime = 0;
+  var p = a.play();
+  if (p && p.catch) p.catch(function(){});
+  return a;
+}
+function stopAll(){ for (var k in cache){ try{cache[k].pause();}catch(e){} } }
+var lastGood=-1, lastBad=-1, lastClick=0;
+var GOOD=['good_tochno','good_umnica','good_molodec'];
+var BAD=['bad_pochti','bad_ne_tochno'];
+function rnd(arr,last){ var i=Math.floor(Math.random()*arr.length); if(i===last&&arr.length>1)i=(i+1)%arr.length; return i; }
+function praise(cb){ stopAll(); lastGood=rnd(GOOD,lastGood); sfx(GOOD[lastGood],cb); }
+function oops(cb){ stopAll(); lastBad=rnd(BAD,lastBad); sfx(BAD[lastBad],cb); }
+function clickOk(){ var t=Date.now(); if(t-lastClick<450)return false; lastClick=t; return true; }
+function show(id){
+  var s=document.querySelectorAll('.screen'); for(var i=0;i<s.length;i++)s[i].classList.remove('on');
+  document.getElementById(id).classList.add('on');
+}
+function shuffle(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+
+/* ============ СТАРТ ============ */
+document.getElementById('playBtn').addEventListener('click', function(){
+  stopAll(); show('sEtap1'); startRound(0, false);
+  sfx('z01', function(){ sfx('z02'); });
+});
+
+/* ============ ЭТАП 1: три раунда ============ */
+var ROUNDS = [
+  {img:'oreh',   need:7, task:'z02', icon:'oreh'},
+  {img:'borovik',need:8, task:'z03', icon:'borovik'},
+  {img:'yabloko',need:6, task:'z04', icon:'yabloko'}
+];
+var TRASH = ['muhomor','kamen_m','kamen_b','suhoi'];
+var grid1 = document.getElementById('grid1');
+var got = 0, round = 0;
+function startRound(r, playTask){
+  round = r; got = 0;
+  document.getElementById('basketIcon').src = 'images/' + ROUNDS[r].icon + '.jpg';
+  document.getElementById('cnt').textContent = '0 из ' + ROUNDS[r].need;
+  buildGrid1(ROUNDS[r]);
+  if (playTask !== false){
+    setTimeout(function(){ sfx(ROUNDS[r].task); }, 300);
+  }
+}
+function buildGrid1(R){
+  grid1.innerHTML = '';
+  var items = [];
+  for (var i=0;i<R.need;i++) items.push({img:R.img, good:true});
+  for (var t=0;t<TRASH.length;t++) items.push({img:TRASH[t], good:false});
+  shuffle(items);
+  items.forEach(function(it){
+    var c = document.createElement('button');
+    c.className = 'card';
+    var im = document.createElement('img');
+    im.src = 'images/' + it.img + '.jpg';
+    im.alt = '';
+    c.appendChild(im);
+    c.addEventListener('click', function(){
+      if (!clickOk()) return;
+      if (it.taken) return;
+      if (it.good){
+        it.taken = 1; c.classList.add('done'); got++;
+        document.getElementById('cnt').textContent = got + ' из ' + R.need;
+        if (got < R.need){
+          /* короткий «щелчок»-похвала не обязателен на каждом — тихо собираем */
+        } else {
+          /* раунд закрыт: остальные нужные гаснут */
+          var cards = grid1.querySelectorAll('.card');
+          for (var k=0;k<cards.length;k++){
+            if (!cards[k].classList.contains('done')) cards[k].classList.add('done');
+          }
+          if (round < 2){
+            setTimeout(function(){ startRound(round+1, true); }, 900);
+          } else {
+            /* все раунды собраны — похвала и переход к листьям */
+            stopAll();
+            praise(function(){ goLeaves(); });
+          }
+        }
+      } else {
+        c.classList.remove('wrong'); void c.offsetWidth; c.classList.add('wrong');
+        stopAll(); sfx('z05');
+        var self = c;
+        setTimeout(function(){ self.classList.remove('wrong'); }, 500);
+      }
+    });
+    grid1.appendChild(c);
+  });
+}
+
+/* ============ ЭТАП 2: кленовые листья ============ */
+/* кленовые: красный и жёлтый; зелёный лист (похож на дубовый) — отвлекающий */
+var MAPLE = ['klen_kras','klen_zhel'];
+var OTHER = ['bereza','ryabina','klen_zelen'];
+var grid2 = document.getElementById('grid2');
+var leafGot = 0, LEAF_NEED = 7;
+function goLeaves(){
+  show('sEtap2'); leafGot = 0;
+  document.getElementById('cnt2').textContent = '0 из ' + LEAF_NEED;
+  grid2.innerHTML = '';
+  var items = [];
+  for (var i=0;i<LEAF_NEED;i++) items.push({img:MAPLE[Math.floor(Math.random()*MAPLE.length)], good:true});
+  for (var o=0;o<OTHER.length;o++){ items.push({img:OTHER[o], good:false}); items.push({img:OTHER[o], good:false}); }
+  items.push({img:'suhoi', good:false});
+  shuffle(items);
+  items.forEach(function(it){
+    var c = document.createElement('button');
+    c.className = 'card';
+    var im = document.createElement('img');
+    im.src = 'images/' + it.img + '.jpg'; im.alt='';
+    c.appendChild(im);
+    c.addEventListener('click', function(){
+      if (!clickOk()) return;
+      if (it.taken) return;
+      if (it.good){
+        it.taken = 1; c.classList.add('pick');
+        setTimeout(function(){ c.classList.add('done'); }, 250);
+        leafGot++;
+        document.getElementById('cnt2').textContent = leafGot + ' из ' + LEAF_NEED;
+        if (leafGot < LEAF_NEED){
+          praise();
+        } else {
+          stopAll();
+          praise(function(){ goPattern(); });
+        }
+      } else {
+        c.classList.remove('wrong'); void c.offsetWidth; c.classList.add('wrong');
+        stopAll(); sfx('z07');
+        var self = c;
+        setTimeout(function(){ self.classList.remove('wrong'); }, 500);
+      }
+    });
+    grid2.appendChild(c);
+  });
+  sfx('z06');
+}
+
+/* ============ ЭТАП 3: ДОРОЖКА ПО ОБРАЗЦУ ============ */
+var PAL_TYPES = ['klen_kras','klen_zhel','bereza','ryabina'];
+var PAT_LENS = [3,4,5];
+var patRound = 0, pattern = [], curPos = 0;
+var patSample = document.getElementById('patSample');
+var patFill = document.getElementById('patFill');
+var palRow = document.getElementById('palRow');
+function buildPalette(){
+  palRow.innerHTML = '';
+  PAL_TYPES.forEach(function(t){
+    var b = document.createElement('button');
+    b.className = 'pal';
+    var im = document.createElement('img');
+    im.src = 'images/' + t + '.jpg'; im.alt='';
+    b.appendChild(im);
+    b.addEventListener('click', function(){
+      if (!clickOk()) return;
+      var want = pattern[curPos];
+      if (t === want){
+        var slot = patFill.children[curPos];
+        var im2 = document.createElement('img');
+        im2.src = 'images/' + t + '.jpg';
+        slot.appendChild(im2);
+        curPos++;
+        if (curPos >= pattern.length){
+          if (patRound < PAT_LENS.length - 1){
+            patRound++;
+            stopAll();
+            sfx('z15', function(){ startPattern(patRound); });
+          } else {
+            stopAll();
+            praise(function(){ goTasks(); });
+          }
+        }
+      } else {
+        b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong');
+        setTimeout(function(){ b.classList.remove('wrong'); }, 450);
+        stopAll(); sfx('z14');
+      }
+    });
+    palRow.appendChild(b);
+  });
+}
+function startPattern(r){
+  patRound = r;
+  pattern = [];
+  for (var i=0;i<PAT_LENS[r];i++){
+    pattern.push(PAL_TYPES[Math.floor(Math.random()*PAL_TYPES.length)]);
+  }
+  curPos = 0;
+  patSample.innerHTML = '';
+  pattern.forEach(function(t){
+    var im = document.createElement('img');
+    im.src = 'images/' + t + '.jpg';
+    patSample.appendChild(im);
+  });
+  patFill.innerHTML = '';
+  for (var j=0;j<pattern.length;j++){
+    var s = document.createElement('div');
+    s.className = 'slot';
+    patFill.appendChild(s);
+  }
+}
+function goPattern(){
+  show('sPattern');
+  buildPalette();
+  startPattern(0);
+  sfx('z13');
+}
+
+/* ============ ЭТАП 4: задачки ============ */
+var TASKS = [
+  {q:'z09', expr:'6 + 5 = ?', ans:11, opts:[10,11,12],
+   groups:[{img:'yabloko',n:6},{img:'yabloko',n:5,add:true}], label:'6 яблок и ещё 5'},
+  {q:'z10', expr:'10 − 3 = ?', ans:7, opts:[6,7,8],
+   groups:[{img:'oreh',n:10,minus:3}], label:'10 орешков, 3 съели'},
+  {q:'z11', expr:'7 + 4 = ?', ans:11, opts:[10,11,12],
+   groups:[{img:'borovik',n:7},{img:'borovik',n:4,add:true}], label:'7 грибов и ещё 4'}
+];
+var taskIdx = 0, numRow = document.getElementById('numRow'), zRow = document.getElementById('zRow');
+function goTasks(){
+  taskIdx = 0;
+  show('sEtap3');
+  document.getElementById('spE3').textContent = 'А теперь — задачки!';
+  document.getElementById('zExpr').style.display = 'none';
+  /* цепочка: вводная z08 → первая задачка z09 */
+  sfx('z08', function(){ showTask(0); });
+}
+function showTask(i){
+  taskIdx = i;
+  var T = TASKS[i];
+  document.getElementById('spE3').textContent = 'Задачка ' + (i+1) + ' из ' + TASKS.length;
+  document.getElementById('zExpr').textContent = T.expr;
+  document.getElementById('zExpr').style.display = 'inline-block';
+  /* картинки-группы: [группа] + [группа] */
+  zRow.innerHTML = '';
+  T.groups.forEach(function(g, gi){
+    if (gi > 0){
+      var plus = document.createElement('span');
+      plus.className = 'zSign';
+      plus.textContent = '+';
+      zRow.appendChild(plus);
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'zItem';
+    for (var k=0;k<g.n;k++){
+      var im = document.createElement('img');
+      im.src = 'images/' + g.img + '.jpg';
+      if (g.minus && k >= g.n - g.minus) im.classList.add('zGone');
+      wrap.appendChild(im);
+    }
+    zRow.appendChild(wrap);
+  });
+  /* кнопки-ответы */
+  numRow.innerHTML = '';
+  T.opts.forEach(function(v){
+    var nb = document.createElement('button');
+    nb.className = 'numbtn';
+    nb.textContent = v;
+    nb.addEventListener('click', function(){
+      if (nb.classList.contains('locked')) return;
+      if (!clickOk()) return;
+      if (v === T.ans){
+        nb.classList.add('good');
+        lockNum(true);
+        if (taskIdx < TASKS.length - 1){
+          praise(function(){ showTask(taskIdx+1); });
+        } else {
+          praise(function(){ goFinal(); });
+        }
+      } else {
+        nb.classList.add('bad');
+        setTimeout(function(){ nb.classList.remove('bad'); }, 450);
+        oops();
+      }
+    });
+    numRow.appendChild(nb);
+  });
+  /* кнопки закрыты, пока звучит вопрос — так звук не сбивается */
+  lockNum(true);
+  sfx(T.q, function(){ lockNum(false); });
+}
+function lockNum(l){
+  var bs = numRow.querySelectorAll('.numbtn');
+  for (var i=0;i<bs.length;i++) bs[i].classList.toggle('locked', l);
+}
+
+/* ============ ФИНАЛ ============ */
+function goFinal(){
+  confettiBurst();
+  show('sFinal');
+  document.getElementById('spFinal').textContent = 'Запасы готовы — зима не страшна!';
+}
+var vidStar = document.getElementById('vidStar');
+document.getElementById('btnStar').addEventListener('click', function(){
+  stopAll();
+  try{ vidStar.currentTime=0; vidStar.play().catch(function(){}); }catch(e){}
+});
+vidStar.addEventListener('ended', function(){
+  document.getElementById('againBtn').style.display = 'inline-flex';
+});
+document.getElementById('againBtn').addEventListener('click', function(){
+  stopAll(); location.reload();
+});
+
+/* конфетти */
+function confettiBurst(){
+  var colors=['#FF5252','#FFD740','#66BB6A','#40C4FF','#E040FB','#FFAB40'];
+  for (var i=0;i<70;i++){
+    var c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=(Math.random()*100)+'vw';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration=(2+Math.random()*2.4)+'s';
+    c.style.animationDelay=(Math.random()*0.5)+'s';
+    document.body.appendChild(c);
+    (function(el){ setTimeout(function(){ if(el.parentNode)el.parentNode.removeChild(el); },5200); })(c);
+  }
+}
+</script>
+</body>
+</html>
